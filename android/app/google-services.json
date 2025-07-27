@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "248196531047",
+    "project_id": "finalhabit",
+    "storage_bucket": "finalhabit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248196531047:android:03dcdbed70fc4f92db65c2",
+        "android_client_info": {
+          "package_name": "com.test.internhabitapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbJ5YtlVV8R8SC4uug2AsLGR9m2DNRQDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
