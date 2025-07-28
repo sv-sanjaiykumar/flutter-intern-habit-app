@@ -17,6 +17,14 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? selectedDeadline;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<HabitProvider>(context, listen: false).loadHabits();
+    });
+  }
+
+  @override
   void dispose() {
     habitController.dispose();
     descriptionController.dispose();
@@ -115,10 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               firstDate: DateTime.now(),
                               lastDate: DateTime(2100),
                               builder: (context, child) {
-                                return Theme(
-                                  data: ThemeData.dark(),
-                                  child: child!,
-                                );
+                                return Theme(data: ThemeData.dark(), child: child!);
                               },
                             );
                             if (pickedDate != null) {
@@ -140,11 +145,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: iconColor,
                           size: 32,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           final title = habitController.text.trim();
                           final description = descriptionController.text.trim();
                           if (title.isNotEmpty) {
-                            habitProvider.addHabit(
+                            await habitProvider.addHabit(
                               title,
                               description,
                               selectedDeadline,

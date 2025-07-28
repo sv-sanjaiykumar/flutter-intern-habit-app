@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../provider/user_provider.dart';
 import 'edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -23,10 +25,10 @@ class AccountScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF000000), // black
+        backgroundColor: const Color(0xFF000000),
         elevation: 0,
       ),
-      backgroundColor: Color(0xFF000000), // black
+      backgroundColor: const Color(0xFF000000),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -36,15 +38,15 @@ class AccountScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              color: Color(0xFF1A1A1A), // dark card
+              color: const Color(0xFF1A1A1A),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 child: Column(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 42,
-                      backgroundColor: Color(0xE400DC0E), // green
-                      child: const Icon(Icons.person, size: 48, color: Colors.black),
+                      backgroundColor: Color(0xE400DC0E),
+                      child: Icon(Icons.person, size: 48, color: Colors.black),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -60,7 +62,7 @@ class AccountScreen extends StatelessWidget {
                       user.email,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
-                        color: Color(0xFFAAAAAA), // hint color
+                        color: Color(0xFFAAAAAA),
                       ),
                     ),
                   ],
@@ -80,8 +82,36 @@ class AccountScreen extends StatelessWidget {
                 icon: const Icon(Icons.edit),
                 label: const Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xE400DC0E), // green
+                  backgroundColor: const Color(0xE400DC0E),
                   foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

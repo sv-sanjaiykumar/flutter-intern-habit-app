@@ -73,9 +73,9 @@ class HabitTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       '📝 Description:',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
                     Text(

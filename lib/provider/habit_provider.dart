@@ -1,54 +1,27 @@
 import 'package:flutter/material.dart';
-
-class Habit {
-  final String id;
-  final String title;
-  final String description;
-  final DateTime createdAt;
-  final DateTime? deadline;
-  bool isCompleted;
-
-  Habit({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.createdAt,
-    this.deadline,
-    this.isCompleted = false,
-  });
-}
+import '../services/firebase_service.dart';
 
 class HabitProvider with ChangeNotifier {
-  final List<Habit> _habits = [];
+  final FirebaseService _firebaseService = FirebaseService();
+  List<Map<String, dynamic>> _habits = [];
 
-  List<Habit> get habits => _habits;
+  List<Map<String, dynamic>> get habits => _habits;
 
-  void addHabit(String title, String description, DateTime? deadline) {
-    _habits.add(
-      Habit(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: title,
-        description: description,
-        createdAt: DateTime.now(),
-        deadline: deadline,
-      ),
-    );
-    notifyListeners();
-  }
-
-  void toggleHabit(String id, {Function(String)? onCompleted}) {
-    final habit = _habits.firstWhere((h) => h.id == id);
-    habit.isCompleted = !habit.isCompleted;
-    notifyListeners();
-
-    if (habit.isCompleted && onCompleted != null) {
-      onCompleted(habit.title); // Add habit name to history
+  Future<void> loadHabits() async {
+    try {
+      _habits = await _firebaseService.fetchUserHabits();
+      notifyListeners();
+    } catch (e) {
+      print("Error loading habits: $e");
     }
   }
 
-
-  void removeHabit(String id) {
-    _habits.removeWhere((h) => h.id == id);
-    notifyListeners();
+  Future<void> addHabit(String title, String description, [DateTime? deadline]) async {
+    try {
+      await _firebaseService.addHabit(title, description, deadline);
+      await loadHabits(); // Reload to update UI
+    } catch (e) {
+      print("Error adding habit: $e");
+    }
   }
 }
