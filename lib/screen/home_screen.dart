@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../provider/habit_provider.dart';
-import 'habit_tile.dart';
+import '../provider/history_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -186,12 +186,107 @@ class _HomeScreenState extends State<HomeScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: habits.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (ctx, index) =>
-                    HabitTile(habit: habits[index]),
+                itemBuilder: (ctx, index) => HabitTile(habit: habits[index]),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class HabitTile extends StatelessWidget {
+  final Map<String, dynamic> habit;
+
+  const HabitTile({super.key, required this.habit});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormatter = DateFormat('dd MMM yyyy');
+    final dayFormatter = DateFormat('EEEE');
+
+    final String id = habit['id'];
+    final String title = habit['title'] ?? '';
+    final String description = habit['description'] ?? '';
+    final bool isCompleted = habit['isCompleted'] ?? false;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        leading: Checkbox(
+          value: isCompleted,
+          activeColor: const Color(0xE400DC0E),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          onChanged: (_) {
+            Provider.of<HabitProvider>(context, listen: false)
+                .toggleHabit(id, !isCompleted);
+          },
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            decoration: isCompleted ? TextDecoration.lineThrough : null,
+            color: Colors.white,
+          ),
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+          onPressed: () {
+            Provider.of<HabitProvider>(context, listen: false).removeHabit(id);
+          },
+        ),
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                backgroundColor: const Color(0xFF2A2A2A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                title: Text(
+                  title,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    const Text(
+                      '📝 Description:',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description.isNotEmpty ? description : 'No description provided.',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close', style: TextStyle(color: Colors.greenAccent)),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }

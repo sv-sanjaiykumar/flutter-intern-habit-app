@@ -81,6 +81,34 @@ class FirebaseService {
     await _auth.signOut();
   }
 
+  // Add inside the FirebaseService class
+
+  Future<void> updateHabitStatus(String habitId, bool isCompleted) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user signed in');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('habits')
+        .doc(habitId)
+        .update({'isCompleted': isCompleted});
+  }
+
+  Future<void> deleteHabit(String habitId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user signed in');
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('habits')
+        .doc(habitId)
+        .delete();
+  }
+
+
+
   // Get current user
   User? get currentUser => _auth.currentUser;
 }

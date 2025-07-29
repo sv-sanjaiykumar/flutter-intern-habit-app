@@ -1,20 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/history_provider.dart';
+import '../provider/user_provider.dart';
 import 'history_tile.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final historyProvider = Provider.of<HistoryProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userEmail = userProvider.email;
+
+    await historyProvider.loadUserHistory(userEmail); // ✅ Properly call method with email
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final historyProvider = Provider.of<HistoryProvider>(context);
     final historyList = historyProvider.history;
 
-    const backgroundColor = Color(0xFF000000);
+    const backgroundColor = Color(0xFF0E0E0E);
     const cardTextColor = Color(0xFFFFFFFF);
     const fadedTextColor = Color(0xFF656565);
-    const appBarColor = Color(0xFF000000);
+    const appBarColor = Color(0xFF0E0E0E);
     const iconColor = Color(0xE400DC0E);
     const borderColor = Color(0xFF000000);
 
@@ -36,14 +61,21 @@ class HistoryScreen extends StatelessWidget {
           if (historyList.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_forever, color: iconColor),
-              onPressed: () {
-                historyProvider.clearHistory();
+              onPressed: () async {
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final userEmail = userProvider.email;
+
+                await historyProvider.clearUserHistory(userEmail); // ✅ call with userEmail
               },
               tooltip: 'Clear History',
             ),
         ],
       ),
-      body: historyList.isEmpty
+      body: _isLoading
+          ? const Center(
+        child: CircularProgressIndicator(color: Colors.green),
+      )
+          : historyList.isEmpty
           ? const Center(
         child: Text(
           "No history yet.\nComplete habits to track them here.",
@@ -60,7 +92,7 @@ class HistoryScreen extends StatelessWidget {
         itemBuilder: (ctx, index) => Container(
           margin: const EdgeInsets.symmetric(vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF313244), // surface 1
+            color: const Color(0xFF313244),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
             boxShadow: [

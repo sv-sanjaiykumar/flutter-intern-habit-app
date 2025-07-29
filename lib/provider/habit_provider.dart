@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_service.dart';
+import '../firebase/firebase_services.dart';
 
 class HabitProvider with ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
@@ -19,9 +19,27 @@ class HabitProvider with ChangeNotifier {
   Future<void> addHabit(String title, String description, [DateTime? deadline]) async {
     try {
       await _firebaseService.addHabit(title, description, deadline);
-      await loadHabits(); // Reload to update UI
+      await loadHabits();
     } catch (e) {
       print("Error adding habit: $e");
+    }
+  }
+
+  Future<void> toggleHabit(String habitId, bool isCompleted) async {
+    try {
+      await _firebaseService.updateHabitStatus(habitId, isCompleted);
+      await loadHabits();
+    } catch (e) {
+      print("Error updating habit status: $e");
+    }
+  }
+
+  Future<void> removeHabit(String habitId) async {
+    try {
+      await _firebaseService.deleteHabit(habitId);
+      await loadHabits();
+    } catch (e) {
+      print("Error deleting habit: $e");
     }
   }
 }

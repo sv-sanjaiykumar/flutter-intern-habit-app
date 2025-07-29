@@ -22,7 +22,7 @@ class TimerScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text('Focus Timer'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF000000), // Direct use of green color
+        backgroundColor: const Color(0xFF0E0E0E), // Direct use of green color
         foregroundColor: Colors.white,
       ),
       body: Center(

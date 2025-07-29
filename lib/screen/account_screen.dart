@@ -25,10 +25,10 @@ class AccountScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: const Color(0xFF0E0E0E),
         elevation: 0,
       ),
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: const Color(0xFF0E0E0E),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(

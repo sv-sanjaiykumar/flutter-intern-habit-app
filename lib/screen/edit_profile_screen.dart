@@ -40,7 +40,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF000000), // black
+      backgroundColor: Color(0xFF0E0E0E), // black
       appBar: AppBar(
         title: const Text(
           'Edit Profile',
@@ -51,7 +51,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF000000), // green
+        backgroundColor: Color(0xFF0E0E0E), // green
         elevation: 0,
       ),
       body: SingleChildScrollView(
