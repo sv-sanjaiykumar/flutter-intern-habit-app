@@ -1,15 +1,19 @@
+// ✅ habit_provider.dart (UPDATED to use Habit model)
+
 import 'package:flutter/material.dart';
 import '../firebase/firebase_services.dart';
+import '../model/habit.dart';
 
 class HabitProvider with ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
-  List<Map<String, dynamic>> _habits = [];
+  List<Habit> _habits = [];
 
-  List<Map<String, dynamic>> get habits => _habits;
+  List<Habit> get habits => _habits;
 
   Future<void> loadHabits() async {
     try {
-      _habits = await _firebaseService.fetchUserHabits();
+      final data = await _firebaseService.fetchUserHabits();
+      _habits = data.map<Habit>((habitMap) => Habit.fromMap(habitMap, habitMap['id'])).toList();
       notifyListeners();
     } catch (e) {
       print("Error loading habits: $e");
@@ -25,12 +29,20 @@ class HabitProvider with ChangeNotifier {
     }
   }
 
-  Future<void> toggleHabit(String habitId, bool isCompleted) async {
+  Future<void> toggleHabit(String habitId, {Function(String habitName)? onCompleted}) async {
     try {
-      await _firebaseService.updateHabitStatus(habitId, isCompleted);
+      final habit = _habits.firstWhere((h) => h.id == habitId);
+      final currentStatus = habit.isCompleted;
+
+      await _firebaseService.updateHabitStatus(habitId, !currentStatus);
+
+      if (!currentStatus && onCompleted != null) {
+        onCompleted(habit.title);
+      }
+
       await loadHabits();
     } catch (e) {
-      print("Error updating habit status: $e");
+      print("❌ Error updating habit status: $e");
     }
   }
 

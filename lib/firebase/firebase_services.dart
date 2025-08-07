@@ -29,6 +29,7 @@ class FirebaseService {
       // Create Firestore user document
       await _firestore.collection('users').doc(cred.user!.uid).set({
         'email': email,
+        'name': '', // <-- add this line
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -37,6 +38,7 @@ class FirebaseService {
       throw Exception('Sign-up failed: ${e.toString()}');
     }
   }
+
 
   // Add habit with optional deadline
   Future<void> addHabit(String title, String description, [DateTime? deadline]) async {
@@ -83,17 +85,19 @@ class FirebaseService {
 
   // Add inside the FirebaseService class
 
-  Future<void> updateHabitStatus(String habitId, bool isCompleted) async {
+  Future<void> updateHabitStatus(String habitId, bool newStatus) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('No user signed in');
+    if (user == null) return;
 
-    await _firestore
+    final habitRef = _firestore
         .collection('users')
         .doc(user.uid)
         .collection('habits')
-        .doc(habitId)
-        .update({'isCompleted': isCompleted});
+        .doc(habitId);
+
+    await habitRef.update({'isCompleted': newStatus});
   }
+
 
   Future<void> deleteHabit(String habitId) async {
     final user = _auth.currentUser;

@@ -61,7 +61,15 @@ class HistoryProvider with ChangeNotifier {
         .collection('history')
         .get();
 
+    final deletedHistoryCollection = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('deleted_history');
+
     for (final doc in historyCollection.docs) {
+      // Archive the deleted item
+      batch.set(deletedHistoryCollection.doc(), doc.data());
+      // Then delete the original
       batch.delete(doc.reference);
     }
 
@@ -69,6 +77,7 @@ class HistoryProvider with ChangeNotifier {
     _history.clear();
     notifyListeners();
   }
+
 
   Future<void> loadUserHistory(String userEmail) async {
     final user = _auth.currentUser;

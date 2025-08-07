@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../provider/user_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -28,19 +30,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  void _saveProfile() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
+
     if (name.isNotEmpty && email.isNotEmpty) {
-      Provider.of<UserProvider>(context, listen: false).updateUser(name, email);
-      Navigator.pop(context);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        try {
+          // Update Firebase Auth email if changed
+          if (email != user.email) {
+            await user.updateEmail(email);
+          }
+
+          // Update Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'name': name, 'email': email});
+
+          // Reload user and refresh provider
+          await user.reload();
+          await userProvider.fetchUserData();
+          await userProvider.loadUserData();
+
+          Navigator.pop(context);
+        } catch (e) {
+          print("Error updating user: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to update profile. Try again.")),
+          );
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF0E0E0E), // black
+      backgroundColor: const Color(0xFF0E0E0E),
       appBar: AppBar(
         title: const Text(
           'Edit Profile',
@@ -51,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF0E0E0E), // green
+        backgroundColor: const Color(0xFF0E0E0E),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -59,7 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Color(0xFF1A1A1A), // dark card
+            color: const Color(0xFF1A1A1A),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -77,10 +107,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 decoration: InputDecoration(
                   labelText: 'Name',
                   labelStyle: const TextStyle(
-                    color: Color(0xFFAAAAAA), // light gray
+                    color: Color(0xFFAAAAAA),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF1A1A1A),
+                  fillColor: const Color(0xFF1A1A1A),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -97,7 +127,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     color: Color(0xFFAAAAAA),
                   ),
                   filled: true,
-                  fillColor: Color(0xFF1A1A1A),
+                  fillColor: const Color(0xFF1A1A1A),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -120,7 +150,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xE400DC0E), // green
+                    backgroundColor: const Color(0xE400DC0E),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

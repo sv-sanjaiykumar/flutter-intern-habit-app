@@ -2,16 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../provider/user_provider.dart';
 import 'edit_profile_screen.dart';
 import 'login_screen.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
   @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.loadUserData();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +51,11 @@ class AccountScreen extends StatelessWidget {
         elevation: 0,
       ),
       backgroundColor: const Color(0xFF0E0E0E),
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : userProvider.userData.isEmpty
+          ? const Center(child: Text("No user data found", style: TextStyle(color: Colors.white)))
+          : Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
@@ -50,7 +76,7 @@ class AccountScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      user.name,
+                      userProvider.userData['name'] ?? 'No Name',
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -59,7 +85,7 @@ class AccountScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      user.email,
+                      userProvider.userData['email'] ?? 'No Email',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Color(0xFFAAAAAA),

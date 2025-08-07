@@ -1,8 +1,10 @@
+// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../provider/habit_provider.dart';
 import '../provider/history_provider.dart';
+import '../model/habit.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,23 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final habitProvider = Provider.of<HabitProvider>(context);
     final habits = habitProvider.habits;
 
-    const backgroundColor = Color(0xFF0E0E0E);
-    const cardColor = Color(0xFF1A1A1A);
-    const hintColor = Colors.grey;
-    const titleColor = Colors.white;
-    const subtitleColor = Colors.white70;
-    const iconColor = Color(0xE400DC0E);
-    const textFieldTextColor = Colors.white;
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFF0E0E0E),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: backgroundColor,
+        backgroundColor: const Color(0xFF0E0E0E),
         title: const Text(
           "Today's Habits",
           style: TextStyle(
-            color: titleColor,
+            color: Colors.white,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -65,107 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: habitController,
-                      style: const TextStyle(
-                        color: textFieldTextColor,
-                        fontSize: 16,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: 'Enter habit title',
-                        hintStyle: TextStyle(
-                          color: hintColor,
-                          fontSize: 16,
-                        ),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: descriptionController,
-                      style: const TextStyle(
-                        color: textFieldTextColor,
-                        fontSize: 14,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: 'Enter description',
-                        hintStyle: TextStyle(
-                          color: hintColor,
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedDeadline == null
-                                ? "No deadline selected"
-                                : "Deadline: ${DateFormat.yMMMd().format(selectedDeadline!)}",
-                            style: const TextStyle(color: subtitleColor),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2100),
-                              builder: (context, child) {
-                                return Theme(data: ThemeData.dark(), child: child!);
-                              },
-                            );
-                            if (pickedDate != null) {
-                              setState(() {
-                                selectedDeadline = pickedDate;
-                              });
-                            }
-                          },
-                          child: const Text("Pick Deadline"),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.add_circle,
-                          color: iconColor,
-                          size: 32,
-                        ),
-                        onPressed: () async {
-                          final title = habitController.text.trim();
-                          final description = descriptionController.text.trim();
-                          if (title.isNotEmpty) {
-                            await habitProvider.addHabit(
-                              title,
-                              description,
-                              selectedDeadline,
-                            );
-                            habitController.clear();
-                            descriptionController.clear();
-                            setState(() {
-                              selectedDeadline = null;
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildAddHabitCard(context, habitProvider),
               const SizedBox(height: 16),
               habits.isEmpty
                   ? const Center(
@@ -175,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "No habits yet.\nStart by adding one!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: subtitleColor,
+                      color: Colors.white70,
                       fontSize: 16,
                     ),
                   ),
@@ -186,7 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: habits.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (ctx, index) => HabitTile(habit: habits[index]),
+                itemBuilder: (ctx, index) =>
+                    HabitTile(habit: habits[index]),
               ),
             ],
           ),
@@ -194,23 +89,105 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildAddHabitCard(
+      BuildContext context, HabitProvider habitProvider) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: habitController,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+            decoration: const InputDecoration(
+              hintText: 'Enter habit title',
+              hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+              border: InputBorder.none,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: descriptionController,
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+            decoration: const InputDecoration(
+              hintText: 'Enter description',
+              hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+              border: InputBorder.none,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  selectedDeadline == null
+                      ? "No deadline selected"
+                      : "Deadline: ${DateFormat.yMMMd().format(selectedDeadline!)}",
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2100),
+                    builder: (context, child) {
+                      return Theme(data: ThemeData.dark(), child: child!);
+                    },
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      selectedDeadline = pickedDate;
+                    });
+                  }
+                },
+                child: const Text("Pick Deadline"),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.add_circle,
+                  color: Color(0xE400DC0E), size: 32),
+              onPressed: () async {
+                final title = habitController.text.trim();
+                final description = descriptionController.text.trim();
+                if (title.isNotEmpty) {
+                  await habitProvider.addHabit(
+                    title,
+                    description,
+                    selectedDeadline,
+                  );
+                  habitController.clear();
+                  descriptionController.clear();
+                  setState(() {
+                    selectedDeadline = null;
+                  });
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class HabitTile extends StatelessWidget {
-  final Map<String, dynamic> habit;
+  final Habit habit;
 
   const HabitTile({super.key, required this.habit});
 
   @override
   Widget build(BuildContext context) {
-    final dateFormatter = DateFormat('dd MMM yyyy');
-    final dayFormatter = DateFormat('EEEE');
-
-    final String id = habit['id'];
-    final String title = habit['title'] ?? '';
-    final String description = habit['description'] ?? '';
-    final bool isCompleted = habit['isCompleted'] ?? false;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -225,29 +202,39 @@ class HabitTile extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         leading: Checkbox(
-          value: isCompleted,
+          value: habit.isCompleted,
           activeColor: const Color(0xE400DC0E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           onChanged: (_) {
-            Provider.of<HabitProvider>(context, listen: false)
-                .toggleHabit(id, !isCompleted);
+            Provider.of<HabitProvider>(context, listen: false).toggleHabit(
+              habit.id,
+              onCompleted: (habitName) {
+                Provider.of<HistoryProvider>(context, listen: false)
+                    .addToHistory(habitName);
+              },
+            );
           },
         ),
         title: Text(
-          title,
+          habit.title,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            decoration: isCompleted ? TextDecoration.lineThrough : null,
+            decoration:
+            habit.isCompleted ? TextDecoration.lineThrough : null,
             color: Colors.white,
           ),
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+          icon: const Icon(Icons.delete_outline_rounded,
+              color: Colors.redAccent),
           onPressed: () {
-            Provider.of<HabitProvider>(context, listen: false).removeHabit(id);
+            Provider.of<HabitProvider>(context, listen: false)
+                .removeHabit(habit.id);
           },
         ),
         onTap: () {
@@ -256,10 +243,12 @@ class HabitTile extends StatelessWidget {
             builder: (context) {
               return AlertDialog(
                 backgroundColor: const Color(0xFF2A2A2A),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 title: Text(
-                  title,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  habit.title,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -268,11 +257,14 @@ class HabitTile extends StatelessWidget {
                     const SizedBox(height: 8),
                     const Text(
                       '📝 Description:',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description.isNotEmpty ? description : 'No description provided.',
+                      habit.description.isNotEmpty
+                          ? habit.description
+                          : 'No description provided.',
                       style: const TextStyle(color: Colors.white70),
                     ),
                   ],
@@ -280,7 +272,8 @@ class HabitTile extends StatelessWidget {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close', style: TextStyle(color: Colors.greenAccent)),
+                    child: const Text('Close',
+                        style: TextStyle(color: Colors.greenAccent)),
                   ),
                 ],
               );
